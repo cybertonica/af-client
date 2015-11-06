@@ -45,13 +45,13 @@ public class AfClient {
     }
 
     public JsonObject createEvent(AfOptions options) throws IOException, InvalidKeyException, NoSuchAlgorithmException {
-        URL url = this.url != null ? new URL(this.url) : new URL(String.format("http://%s:%s/api/v2/scoring/createEvent", host, port));
+        URL url = this.url != null ? new URL(this.url) : new URL(String.format("http://%s:%s/api/v2/createEvent", host, port));
         openConnection(url, options);
         return post(options.toString());
     }
 
     public JsonObject updateEvent(AfOptions options) throws IOException, InvalidKeyException, NoSuchAlgorithmException {
-        URL url = this.url != null ? new URL(this.url) : new URL(String.format("http://%s:%s/api/v2/scoring/updateEvent", host, port));
+        URL url = this.url != null ? new URL(this.url) : new URL(String.format("http://%s:%s/api/v2/updateEvent", host, port));
         openConnection(url, options);
         return post(options.toString());
     }

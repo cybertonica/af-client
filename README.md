@@ -17,7 +17,7 @@ Then set the request parameters (see omnireact-integration.pdf for the details):
                         .add("dst_parent", "MTS")
                         .add("amount", 10201)
                         .add("exp", 2)
-                        .add("cur", 643));
+                        .add("currency", 643));
 ```
 
 
@@ -47,21 +47,23 @@ public class Example {
             throws IOException, NoSuchAlgorithmException, InvalidKeyException {
         JsonObject responseGlobal = AfClient.get("localhost", 7499).createEvent(
                 AfOptions.create("user", "secret")
-                        .add("channel", "money_transfer")
-                        .add("sub_channel", "test_subchannel2")
-                        .add("src_id", AfClient.SHA_256("400012341234233"))
+                        .add("channel", "p2p_money_transfer")
+                        .add("sub_channel", "sub_channel")
+                        .add("src_id", AfClient.SHA_256("4000123412341233"))
                         .add("src_parent", "VISA")
                         .add("dst_id", 9168212901L)
                         .add("dst_parent", "MTS")
                         .add("amount", 10201)
                         .add("exp", 2)
-                        .add("cur", 643));
+                        .add("exp_date", "1/25")
+                        .add("operation_type", "input")
+                        .add("currency", 643));
         System.out.println(responseGlobal);
 
-        JsonObject responseAcquiring = AfClient.get("http://localhost:7499/api/v2/scoring/createEvent")
+        JsonObject responseAcquiring = AfClient.get("http://localhost:7499/api/v2/createEvent")
                 .createEvent(AfOptions.create("user", "secret")
                         .add("channel", "acquiring")
-                        .add("sub_channel", "mts")
+                        .add("sub_channel", "sub_channel")
                         .add("src_id", AfClient.SHA_256("400012341234232"))
                         .add("src_parent", "VISA")
                         .add("dst_id", 9168212906L)
@@ -73,7 +75,7 @@ public class Example {
                         .add("cookie", "some_cookie")
                         .add("mcc", "123")
                         .add("exp_date", "12/18")
-                        .add("cur", 643));
+                        .add("currency", 643));
         System.out.println(responseAcquiring);
 
         JsonObject updateCharge = AfClient.get("localhost", 7499).updateEvent(
