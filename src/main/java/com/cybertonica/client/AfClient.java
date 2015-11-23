@@ -23,6 +23,7 @@ public class AfClient {
     private HttpURLConnection connection;
     private String url;
     private String host;
+    private String protocol = "https";
     private int port;
 
     private AfClient() {}
@@ -36,6 +37,12 @@ public class AfClient {
         this.port = port;
     }
 
+    private AfClient(String protocol, String host, int port) throws MalformedURLException {
+        this.protocol = protocol;
+        this.host = host;
+        this.port = port;
+    }
+
     public static AfClient get(String url) throws MalformedURLException {
         return new AfClient(url);
     }
@@ -44,14 +51,18 @@ public class AfClient {
         return new AfClient(host, port);
     }
 
+    public static AfClient get(String protocol, String host, int port) throws MalformedURLException {
+        return new AfClient(protocol, host, port);
+    }
+
     public JsonObject createEvent(AfOptions options) throws IOException, InvalidKeyException, NoSuchAlgorithmException {
-        URL url = this.url != null ? new URL(this.url) : new URL(String.format("http://%s:%s/api/v2/createEvent", host, port));
+        URL url = this.url != null ? new URL(this.url) : new URL(String.format("%s://%s:%s/api/v2/createEvent", protocol, host, port));
         openConnection(url, options);
         return post(options.toString());
     }
 
     public JsonObject updateEvent(AfOptions options) throws IOException, InvalidKeyException, NoSuchAlgorithmException {
-        URL url = this.url != null ? new URL(this.url) : new URL(String.format("http://%s:%s/api/v2/updateEvent", host, port));
+        URL url = this.url != null ? new URL(this.url) : new URL(String.format("%s://%s:%s/api/v2/updateEvent", protocol, host, port));
         openConnection(url, options);
         return post(options.toString());
     }

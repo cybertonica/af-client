@@ -4,7 +4,7 @@ AFClient
 To connect the test environment replace "localhost", "user" and "secret" with the actual data (provided on a request).
 
 ```
-AfClient.get("localhost", 7499).createEvent(AfOptions.create("user", "secret"))
+AfClient.get("http", "host", 7499).createEvent(AfOptions.create("user", "secret"))
 ```
 
 Then set the request parameters (see omnireact-integration.pdf for the details):
@@ -45,7 +45,7 @@ public class Example {
 
     public static void main(String[] args)
             throws IOException, NoSuchAlgorithmException, InvalidKeyException {
-        JsonObject responseGlobal = AfClient.get("localhost", 7499).createEvent(
+        JsonObject responseGlobal = AfClient.get("http", "host", 7499).createEvent(
                 AfOptions.create("user", "secret")
                         .add("channel", "p2p_money_transfer")
                         .add("sub_channel", "sub_channel")
@@ -78,7 +78,7 @@ public class Example {
                         .add("currency", 643));
         System.out.println(responseAcquiring);
 
-        JsonObject updateCharge = AfClient.get("localhost", 7499).updateEvent(
+        JsonObject updateCharge = AfClient.get("http", "host", 7499).updateEvent(
                 AfOptions.create("user", "secret")
                         .add("id", responseGlobal.get("tx_id").asString())
                         .add("status", "OK")
