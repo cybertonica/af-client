@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Example Payment Form - Cybertonica</title>
+    <style>
+        #cardnumber, #cardholder, #cvv {
+            font-size: large;
+        }
+
+        #start_payment {
+            font-size: 125%;
+            padding-left: 1em;
+            padding-right: 1em;
+            color: white;
+            background-color: blue;
+            cursor: hand;
+        }
+
+        #payment_form table {
+            border: 1px solid blue;
+            background-color: #f0f0fc;
+        }
+    </style>
+</head>
+<body>
+<h1>Cybertonica Example Payment Form</h1>
+
+<p style="color: gray">This form is for demonstration purposes only. Do NOT use it in production!</p>
+
+<form id="payment_form">
+    <table>
+        <tr>
+            <td><label for="cardnumber">Cardnumber:</label></td>
+            <td colspan="3"><input id="cardnumber" type="text" size="20" maxlength="20" autocomplete="cc-number"></td>
+        </tr>
+        <tr>
+            <td><label for="cardholder">Cardholder:</label></td>
+            <td colspan="3"><input id="cardholder" type="text" size="20" maxlength="40" autocomplete="cc-name"></td>
+        </tr>
+        <tr>
+            <td><label for="expiration_month" autocomplete="cc-exp-month">Expiration month:</label></td>
+            <td><select id="expiration_month">
+                <option value="01">01</option>
+                <option value="02">02</option>
+                <option value="03">03</option>
+                <option value="04">04</option>
+                <option value="05">05</option>
+                <option value="06">06</option>
+                <option value="07">07</option>
+                <option value="08">08</option>
+                <option value="09">09</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+            </select></td>
+            <td><label for="expiration_year">Expiration year:</label></td>
+            <td><select id="expiration_year" autocomplete="cc-exp-year">
+                <option value="2016">2016</option>
+                <option value="2017">2017</option>
+                <option value="2018">2018</option>
+                <option value="2020">2019</option>
+                <option value="2021">2020</option>
+                <option value="2022">2021</option>
+            </select></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td><label for="cvv">CVV</label></td>
+            <td><input id="cvv" type="text" size="4" maxlength="4"></td>
+        </tr>
+        <tr>
+            <td colspan="3"></td>
+            <td><a id="start_payment">Pay</a></td>
+        </tr>
+    </table>
+
+</form>
+<script>
+    // ----
+    // Place this code in a separate file and minify it if you wish
+    // ----
+    var AFCYBERTONICA = {
+        v: '0.1.2',
+        // fixind some compatibility issues
+        stringify: (window.JSON || {}).stringify || function (obj) {
+            var output = [], undef = void 0;
+            if (obj instanceof Object) {
+                if (obj.constructor === Array) {
+                    for (var nId = 0; nId < obj.length; nId++) {
+                        output.push(AFCYBERTONICA.stringify(obj[nId]));
+                    }
+                    return '[' + output + ']';
+                }
+                if (obj.toString !== Object.prototype.toString) {
+                    return '"' + obj.toString().replace(/"/g, '\\$&') + '"';
+                }
+                for (var k in obj) {
+                    if (obj.hasOwnProperty(k) && obj[k] !== undef) {
+                        output.push('"' + k.replace(/"/g, '\\$&') + '":' + AFCYBERTONICA.stringify(obj[k]));
+                    }
+                }
+                return '{' + output + '}';
+            }
+            if (obj === undef) {
+                return 'null';
+            }
+            return typeof obj === 'string' ? '"' + obj.replace(/"/g, '\\$&') + '"' : obj + '';
+        }
+    };
+
+    (function (AFCYBERTONICA, window) {
+        // --- device fingerprinting ---
+        function devinfo() {
+            var navigator = window.navigator;
+            var screen = window.screen;
+            var plugins = navigator.plugins || [];
+            var navigatorProps = 'cookieEnabled cpuClass language oscpu platform userAgent vendor'.split(' ');
+            var screenProps = 'colorDepth height pixelDepth width'.split(' ');
+            var activeXnames =
+                    'AcroPDF.PDF_Adodb.Stream_AgControl.AgControl_DevalVRXCtrl.DevalVRXCtrl.1_' +
+                    'MacromediaFlashPaper.MacromediaFlashPaper_Msxml2.DOMDocument_Msxml2.XMLHTTP_PDF.PdfCtrl_' +
+                    'QuickTime.QuickTime_QuickTimeCheckObject.QuickTimeCheck.1_' +
+                    'RealPlayer_RealPlayer.RealPlayer(tm) ActiveX Control (32-bit)_' +
+                    'RealVideo.RealVideo(tm) ActiveX Control (32-bit)_' +
+                    'rmocx.RealPlayer G2 Control_Scripting.Dictionary_Shell.UIHelper_' +
+                    'ShockwaveFlash.ShockwaveFlash_SWCtl.SWCtl_TDCCtl.TDCCtl_WMPlayer.OCX'.split('_');
+            var device = {
+                dpr: window.devicePixelRatio || (screen.deviceXDPI / screen.logicalXDPI) || 1,
+                plugins: [],
+                tzo: new Date().getTimezoneOffset()
+            };
+            var i, plugin;
+            try {
+                device.java = navigator.javaEnabled();
+            } catch (err) {
+            }
+            for (i = screenProps.length; i--;) {
+                device[screenProps[i]] = screen[screenProps[i]];
+            }
+            for (i = navigatorProps.length; i--;) {
+                device[navigatorProps[i]] = navigator[navigatorProps[i]];
+            }
+            if (window.ActiveXObject && !plugins.length) {
+                for (i = activeXnames.length; i--;) {
+                    try {
+                        plugin = activeXnames[i];
+                        new ActiveXObject(plugin);
+                        plugins.push(plugin);
+                    } catch (err) {
+                    }
+                }
+            } else {
+                for (i = plugins.length; i--;) {
+                    device.plugins[i] = plugins[i].name;
+                }
+            }
+            return AFCYBERTONICA.stringify(device);
+        }
+        // --- biometry ---
+        var eventsStore = {};
+
+        function keyevent(byElement, eventName) {
+            byElement.e.push([eventName, new Date().getTime() - byElement.t
+            ]);
+        }
+
+        function watch(elementId) {
+            if (!eventsStore.hasOwnProperty(elementId)) {
+                eventsStore[elementId] = {
+                    e: [],
+                    t: new Date().getTime()
+                };
+                var e = document.getElementById(elementId);
+                var events = 'change focus keypress keyup mouseover'.split(' ');
+                for (var i = 0; i < events.length; ++i) {
+                    e['on' + events[i]] = function (e) {
+                        keyevent(eventsStore[elementId], (e || window.event /* for IE < 9 */).type);
+                    };
+                }
+            }
+        }
+        function events() {
+            return AFCYBERTONICA.stringify(eventsStore);
+        }
+
+        function initBeacon(api_user) {
+            function S4() {
+                return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+            }
+            var tid = (S4() + S4() + "-" + S4() + "-4" + S4().substr(0, 3) + "-" + S4() + "-" + S4() + S4() + S4()).toLowerCase();
+            var img = document.createElement('img');
+            img.width = 1;
+            img.height = 1;
+            img.style.display = 'none';
+            img.src = 'https://p.cybertonica.com/img/p.png?tid=' + tid + '&api_user=' + api_user + '&r=' + Math.random();
+            document.body.insertBefore(img, document.body.firstChild);
+        }
+
+        AFCYBERTONICA.init = function(apiuser, formFields) {
+            initBeacon(apiuser);
+            for (var i = 0, ii=formFields.length; i < ii; i++) {
+                watch(formFields[i]);
+            }
+        };
+
+        AFCYBERTONICA.result = function() {
+            var tmp = {
+                events: events(),
+                devinfo: devinfo()
+            };
+            return AFCYBERTONICA.stringify(tmp);
+        };
+
+    })(AFCYBERTONICA, window);
+
+</script>
+
+<script>
+    function processPayment(e) {
+        // TODO: collection payment information here...
+
+        var afinfo = AFCYBERTONICA.result();
+        console.log(afinfo); // TODO: debug output! remove it.
+        // TODO: afinfo is a string. Put it into 'fingerprints' fields in AF API createEvent method.
+
+        // TODO: Send request to your processing server using AJAX, form submit or any other method.
+    }
+
+    window.onload = function () {
+        AFCYBERTONICA.init(
+                'test', // TODO: replace this value!
+                ['cardnumber', 'cardholder', 'expiration_month', 'expiration_year'] // TODO: replace these values!
+        );
+        document.getElementById('start_payment').addEventListener('click', processPayment, false);
+    };
+</script>
+</body>
+</html>
