@@ -195,13 +195,14 @@
             img.style.display = 'none';
             img.src = 'https://p.cybertonica.com/img/p.png?tid=' + tid + '&api_user=' + api_user + '&r=' + Math.random();
             document.body.insertBefore(img, document.body.firstChild);
+            return tid;
         }
 
         AFCYBERTONICA.init = function(apiuser, formFields) {
-            initBeacon(apiuser);
             for (var i = 0, ii=formFields.length; i < ii; i++) {
                 watch(formFields[i]);
             }
+            AFCYBERTONICA._tid = initBeacon(apiuser);
         };
 
         AFCYBERTONICA.result = function() {
@@ -209,7 +210,10 @@
                 events: events(),
                 devinfo: devinfo()
             };
-            return AFCYBERTONICA.stringify(tmp);
+            return {
+                fingerprints: AFCYBERTONICA.stringify(tmp),
+                tid: AFCYBERTONICA._tid
+            }
         };
 
     })(AFCYBERTONICA, window);
@@ -222,7 +226,7 @@
 
         var afinfo = AFCYBERTONICA.result();
         console.log(afinfo); // TODO: debug output! remove it.
-        // TODO: afinfo is a string. Put it into 'fingerprints' fields in AF API createEvent method.
+        // TODO: get tid and fingerprints fields from afinfo and send them to you server and then to AF API createEvent.
 
         // TODO: Send request to your processing server using AJAX, form submit or any other method.
     }
