@@ -31,7 +31,8 @@
     <table>
         <tr>
             <td><label for="cardnumber">Cardnumber:</label></td>
-            <td colspan="3"><input id="cardnumber" type="text" size="20" maxlength="20" autocomplete="cc-number"></td>
+            <td colspan="3"><input id="cardnumber" type="text" size="20" maxlength="20"
+                                   autocomplete="cc-number"></td>
         </tr>
         <tr>
             <td><label for="cardholder">Cardholder:</label></td>
@@ -83,6 +84,11 @@
     var AFCYBERTONICA = {
         v: '0.1.2',
         // fixind some compatibility issues
+
+        now: (Date.now || function() {
+            return new Date().getTime();
+        }),
+
         stringify: (window.JSON || {}).stringify || function (obj) {
             var output = [], undef = void 0;
             if (obj instanceof Object) {
@@ -106,7 +112,53 @@
                 return 'null';
             }
             return typeof obj === 'string' ? '"' + obj.replace(/"/g, '\\$&') + '"' : obj + '';
-        }
+        },
+
+        addEvent: function (obj, type, fn) {
+            if (obj.addEventListener) {
+                obj.addEventListener(type, fn, false);
+                AFCYBERTONICA.EventCache.add(obj, type, fn);
+            }
+            else if (obj.attachEvent) {
+                obj["e" + type + fn] = fn;
+                obj[type + fn] = function () {
+                    obj["e" + type + fn](window.event);
+                };
+                obj.attachEvent("on" + type, obj[type + fn]);
+                AFCYBERTONICA.EventCache.add(obj, type, fn);
+            }
+            else {
+                obj["on" + type] = obj["e" + type + fn];
+            }
+        },
+
+        EventCache: function () {
+            var listEvents = [];
+            return {
+                listEvents: listEvents,
+                add: function (node, sEventName, fHandler) {
+                    listEvents.push(arguments);
+                },
+
+                flush: function () {
+                    var i, item;
+                    for (i = listEvents.length - 1; i >= 0; i = i - 1) {
+                        item = listEvents[i];
+                        if (item[0].removeEventListener) {
+                            item[0].removeEventListener(item[1], item[2], item[3]);
+                        }
+                        if (item[1].substring(0, 2) != "on") {
+                            item[1] = "on" + item[1];
+                        }
+                        if (item[0].detachEvent) {
+                            item[0].detachEvent(item[1], item[2]);
+                        }
+                        item[0][item[1]] = null;
+                    }
+
+                }
+            }
+        }()
     };
 
     (function (AFCYBERTONICA, window) {
@@ -157,11 +209,12 @@
             }
             return AFCYBERTONICA.stringify(device);
         }
+
         // --- biometry ---
         var eventsStore = {};
 
         function keyevent(byElement, eventName) {
-            byElement.e.push([eventName, new Date().getTime() - byElement.t
+            byElement.e.push([eventName, AFCYBERTONICA.now() - byElement.t
             ]);
         }
 
@@ -169,17 +222,18 @@
             if (!eventsStore.hasOwnProperty(elementId)) {
                 eventsStore[elementId] = {
                     e: [],
-                    t: new Date().getTime()
+                    t: AFCYBERTONICA.now()
                 };
                 var e = document.getElementById(elementId);
                 var events = 'change focus keypress keyup mouseover'.split(' ');
                 for (var i = 0; i < events.length; ++i) {
-                    e['on' + events[i]] = function (e) {
+                    AFCYBERTONICA.addEvent(e, events[i], function (e) {
                         keyevent(eventsStore[elementId], (e || window.event /* for IE < 9 */).type);
-                    };
+                    });
                 }
             }
         }
+
         function events() {
             return AFCYBERTONICA.stringify(eventsStore);
         }
@@ -188,6 +242,7 @@
             function S4() {
                 return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
             }
+
             var tid = (S4() + S4() + "-" + S4() + "-4" + S4().substr(0, 3) + "-" + S4() + "-" + S4() + S4() + S4()).toLowerCase();
             var img = document.createElement('img');
             img.width = 1;
@@ -198,14 +253,15 @@
             return tid;
         }
 
-        AFCYBERTONICA.init = function(apiuser, formFields) {
-            for (var i = 0, ii=formFields.length; i < ii; i++) {
+        AFCYBERTONICA.init = function (apiuser, formFields) {
+            AFCYBERTONICA.addEvent(window,'unload',AFCYBERTONICA.EventCache.flush);
+            for (var i = 0, ii = formFields.length; i < ii; i++) {
                 watch(formFields[i]);
             }
             AFCYBERTONICA._tid = initBeacon(apiuser);
         };
 
-        AFCYBERTONICA.result = function() {
+        AFCYBERTONICA.result = function () {
             var tmp = {
                 events: events(),
                 devinfo: devinfo()
@@ -225,7 +281,7 @@
         // TODO: collection payment information here...
 
         var afinfo = AFCYBERTONICA.result();
-        console.log(afinfo); // TODO: debug output! remove it.
+        console.log(AFCYBERTONICA.stringify(afinfo)); // TODO: debug output! remove it.
         // TODO: get tid and fingerprints fields from afinfo and send them to you server and then to AF API createEvent.
 
         // TODO: Send request to your processing server using AJAX, form submit or any other method.
@@ -236,7 +292,8 @@
                 'test', // TODO: replace this value!
                 ['cardnumber', 'cardholder', 'expiration_month', 'expiration_year'] // TODO: replace these values!
         );
-        document.getElementById('start_payment').addEventListener('click', processPayment, false);
+		
+        AFCYBERTONICA.addEvent(document.getElementById('start_payment'), 'click', processPayment, false);
     };
 </script>
 </body>
