@@ -59,9 +59,9 @@
                 <option value="2016">2016</option>
                 <option value="2017">2017</option>
                 <option value="2018">2018</option>
-                <option value="2020">2019</option>
-                <option value="2021">2020</option>
-                <option value="2022">2021</option>
+                <option value="2019">2019</option>
+                <option value="2020">2020</option>
+                <option value="2021">2021</option>
             </select></td>
         </tr>
         <tr>
@@ -253,6 +253,7 @@
             return tid;
         }
 
+        // call this function after the page load
         AFCYBERTONICA.init = function (apiuser, formFields) {
             AFCYBERTONICA.addEvent(window,'unload',AFCYBERTONICA.EventCache.flush);
             for (var i = 0, ii = formFields.length; i < ii; i++) {
@@ -261,7 +262,9 @@
             AFCYBERTONICA._tid = initBeacon(apiuser);
         };
 
-        AFCYBERTONICA.result = function () {
+
+        // call this function if you want to send the device fingerprint WITH your data
+        AFCYBERTONICA.getInfoToSend = function () {
             var tmp = {
                 events: events(),
                 devinfo: devinfo()
@@ -272,28 +275,52 @@
             }
         };
 
+        // call this function is you want to send the device fingerprint IN PARALLEL to your data submit.
+        AFCYBERTONICA.postInfo = function(apiUserName, operationId) {
+            var id = AFCYBERTONICA._tid;
+            if (operationId !== undefined) {
+                id = operationId;
+            }
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'https://c.cybertonica.com/' + apiUserName + '/ci/' + id);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(AFCYBERTONICA.stringify({
+                events: events(),
+                devinfo: devinfo()
+            }));
+
+            return id;
+        }
+
     })(AFCYBERTONICA, window);
 
 </script>
 
 <script>
-    function processPayment(e) {
-        // TODO: collection payment information here...
 
-        var afinfo = AFCYBERTONICA.result();
-        console.log(AFCYBERTONICA.stringify(afinfo)); // TODO: debug output! remove it.
-        // TODO: get tid and fingerprints fields from afinfo and send them to you server and then to AF API createEvent.
+    var AF_API_USER = 'test'; // TODO: replace this value!
 
-        // TODO: Send request to your processing server using AJAX, form submit or any other method.
+    function processPaymentIndirectDataSend(e) {
+        var afinfo = AFCYBERTONICA.getInfoToSend();
+        // TODO: submit afinfo with the form
+    }
+
+    function processPaymentDirectDataSend(e) {
+        // TODO: if you have a unique event ID then you can use just:
+        // AFCYBERTONICA.postInfo('test', YOUR_UNIQUE_ID);
+
+        var uniqueOperationId = AFCYBERTONICA.postInfo(AF_API_USER);
+        // TODO: send uniqueOperationId with the form to the server
     }
 
     window.onload = function () {
         AFCYBERTONICA.init(
-                'test', // TODO: replace this value!
+                AF_API_USER,
                 ['cardnumber', 'cardholder', 'expiration_month', 'expiration_year'] // TODO: replace these values!
         );
 		
-        AFCYBERTONICA.addEvent(document.getElementById('start_payment'), 'click', processPayment, false);
+        AFCYBERTONICA.addEvent(document.getElementById('start_payment'), 'click', processPaymentDirectDataSend, false);
     };
 </script>
 </body>
