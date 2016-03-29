@@ -287,7 +287,8 @@
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.send(AFCYBERTONICA.stringify({
                 events: events(),
-                devinfo: devinfo()
+                devinfo: devinfo(),
+                tid: AFCYBERTONICA._tid
             }));
 
             return id;
