@@ -2,6 +2,7 @@ package com.cybertonica.client;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -58,13 +59,13 @@ public class AfClient {
     public JsonObject createEvent(AfOptions options) throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         URL url = this.url != null ? new URL(this.url) : new URL(String.format("%s://%s:%s/api/v2/createEvent", protocol, host, port));
         openConnection(url, options);
-        return post(options.toString());
+        return postCreate(options.toString());
     }
 
-    public JsonObject updateEvent(AfOptions options) throws IOException, InvalidKeyException, NoSuchAlgorithmException {
+    public JsonValue updateEvent(AfOptions options) throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         URL url = this.url != null ? new URL(this.url) : new URL(String.format("%s://%s:%s/api/v2/updateEvent", protocol, host, port));
         openConnection(url, options);
-        return post(options.toString());
+        return postUpdate(options.toString());
     }
 
     private String sign(String json, String secret) throws NoSuchAlgorithmException, UnsupportedEncodingException, InvalidKeyException {
@@ -75,7 +76,7 @@ public class AfClient {
         return new sun.misc.BASE64Encoder().encode(result);
     }
 
-    private JsonObject post(String params) throws IOException {
+    private JsonObject postCreate(String params) throws IOException {
         byte[] postData = params.getBytes(StandardCharsets.UTF_8);
         connection.setRequestProperty("Content-Length", Integer.toString(postData.length));
         DataOutputStream wr = null;
@@ -91,6 +92,24 @@ public class AfClient {
         Scanner s = new Scanner(in).useDelimiter("\\A");
         String jsonStr = s.hasNext() ? s.next() : "";
         return Json.parse(Json.parse(jsonStr).asString()).asObject();
+    }
+
+    private JsonValue postUpdate(String params) throws IOException {
+        byte[] postData = params.getBytes(StandardCharsets.UTF_8);
+        connection.setRequestProperty("Content-Length", Integer.toString(postData.length));
+        DataOutputStream wr = null;
+        try {
+            wr = new DataOutputStream(connection.getOutputStream());
+            wr.write(postData);
+        } catch (Exception ex) {
+            if (wr != null) {
+                wr.close();
+            }
+        }
+        Reader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
+        Scanner s = new Scanner(in).useDelimiter("\\A");
+        String jsonStr = s.hasNext() ? s.next() : "";
+        return Json.value(jsonStr);
     }
 
     private AfClient openConnection(URL url, AfOptions options) throws IOException, InvalidKeyException, NoSuchAlgorithmException {
