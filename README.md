@@ -80,7 +80,7 @@ public class Example {
 
         JsonObject updateCharge = AfClient.get("http", "host", 7499).updateEvent(
                 AfOptions.create("user", "secret")
-                        .add("id", responseGlobal.get("tx_id").asString())
+                        .add("tx_id", responseGlobal.get("tx_id").asString())
                         .add("status", "OK")
                         .add("code", "123")
                         .add("comment", "some_comment"));
