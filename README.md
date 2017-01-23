@@ -3,12 +3,12 @@ AFClient
 
 To connect the test environment replace "localhost", "user" and "secret" with the actual data (provided on a request).
 
-```
+```java
 AfClient.get("http", "host", 7499).createEvent(AfOptions.create("user", "secret"))
 ```
 
 Then set the request parameters (see omnireact-integration.pdf for the details):
-```
+```java
                         .add("channel", "money_transfer")
                         .add("sub_channel", "test_subchannel2")
                         .add("src_id", AfClient.SHA_256("4000123412341233")))
@@ -22,17 +22,17 @@ Then set the request parameters (see omnireact-integration.pdf for the details):
 
 
 Possible JSON responses:
-```
+```json
 {"code":203,"comment":"Bad signature"}
 ```
-```
+```json
 "{\"tx_id\":\"aq_tx:560c178ce4b099255ca27a7c\",\"action\":\"ALLOW\",\"risk_score\":0,\"rule_score\":0,\"reason\":\"ALLOW\\tdefault strategy\\t \",\"hierarchy\":{\"ML\":{}}}"
 ```
 
 
 A full example:
 
-```
+```java
 import com.cybertonica.client.AfClient;
 import com.cybertonica.client.AfOptions;
 import com.eclipsesource.json.JsonObject;
@@ -91,14 +91,14 @@ public class Example {
 ```
 
 Current version:
-```
+```xml
     <groupId>com.cybertonica.client</groupId>
     <artifactId>AFClient</artifactId>
     <version>0.1</version>
 ```
 
 Depends on:
-```
+```xml
     <groupId>com.eclipsesource.minimal-json</groupId>
     <artifactId>minimal-json</artifactId>
     <version>0.9.4</version>
