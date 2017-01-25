@@ -57,13 +57,13 @@ public class AfClient {
     }
 
     public JsonObject createEvent(AfOptions options) throws IOException, InvalidKeyException, NoSuchAlgorithmException {
-        URL url = this.url != null ? new URL(this.url) : new URL(String.format("%s://%s:%s/api/v2/createEvent", protocol, host, port));
+        URL url = this.url != null ? new URL(this.url) : new URL(String.format("%s://%s:%s/api/v2.1/createEvent", protocol, host, port));
         openConnection(url, options);
         return postCreate(options.toString());
     }
 
-    public JsonValue updateEvent(AfOptions options) throws IOException, InvalidKeyException, NoSuchAlgorithmException {
-        URL url = this.url != null ? new URL(this.url) : new URL(String.format("%s://%s:%s/api/v2/updateEvent", protocol, host, port));
+    public JsonObject updateEvent(AfOptions options) throws IOException, InvalidKeyException, NoSuchAlgorithmException {
+        URL url = this.url != null ? new URL(this.url) : new URL(String.format("%s://%s:%s/api/v2.1/updateEvent", protocol, host, port));
         openConnection(url, options);
         return postUpdate(options.toString());
     }
@@ -91,10 +91,10 @@ public class AfClient {
         Reader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
         Scanner s = new Scanner(in).useDelimiter("\\A");
         String jsonStr = s.hasNext() ? s.next() : "";
-        return Json.parse(Json.parse(jsonStr).asString()).asObject();
+        return Json.parse(jsonStr).asObject();
     }
 
-    private JsonValue postUpdate(String params) throws IOException {
+    private JsonObject postUpdate(String params) throws IOException {
         byte[] postData = params.getBytes(StandardCharsets.UTF_8);
         connection.setRequestProperty("Content-Length", Integer.toString(postData.length));
         DataOutputStream wr = null;
@@ -109,7 +109,7 @@ public class AfClient {
         Reader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
         Scanner s = new Scanner(in).useDelimiter("\\A");
         String jsonStr = s.hasNext() ? s.next() : "";
-        return Json.value(jsonStr);
+        return new JsonObject().add("", jsonStr);
     }
 
     private AfClient openConnection(URL url, AfOptions options) throws IOException, InvalidKeyException, NoSuchAlgorithmException {

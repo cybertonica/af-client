@@ -13,8 +13,10 @@ Then set the request parameters (see omnireact-integration.pdf for the details):
                         .add("sub_channel", "test_subchannel2")
                         .add("src_id", AfClient.SHA_256("4000123412341233")))
                         .add("src_parent", "VISA")
+                        .add("src_partner", "src_partner")
                         .add("dst_id", 9168212901L)
                         .add("dst_parent", "MTS")
+                        .add("dst_partner", "dst_partner")
                         .add("amount", 10201)
                         .add("exp", 2)
                         .add("currency", 643));
@@ -82,6 +84,7 @@ public class Example {
                 AfOptions.create("user", "secret")
                         .add("tx_id", responseGlobal.get("tx_id").asString())
                         .add("status", "OK")
+                        .add("is_authed", 1)
                         .add("code", "123")
                         .add("comment", "some_comment"));
         System.out.println(updateCharge);
@@ -94,7 +97,7 @@ Current version:
 ```xml
     <groupId>com.cybertonica.client</groupId>
     <artifactId>AFClient</artifactId>
-    <version>0.1</version>
+    <version>0.2</version>
 ```
 
 Depends on:
