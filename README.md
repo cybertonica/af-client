@@ -4,7 +4,7 @@ AFClient
 To connect the test environment replace "localhost", "user" and "secret" with the actual data (provided on a request).
 
 ```java
-AfClient.get("http", "host", 7499).createEvent(AfOptions.create("user", "secret"))
+AfClient.get("https", "host", 7499).createEvent(AfOptions.create("user", "secret"))
 ```
 
 Then set the request parameters (see omnireact-integration.pdf for the details):
@@ -47,8 +47,14 @@ public class Example {
 
     public static void main(String[] args)
             throws IOException, NoSuchAlgorithmException, InvalidKeyException {
-        JsonObject responseGlobal = AfClient.get("http", "host", 7499).createEvent(
-                AfOptions.create("user", "secret")
+        String protocol = "https";
+        String host = "test.cybertonica.com";
+        int port = 7499;
+        String apiUser = "YOUR_API_USER_NAME_HERE"; // TODO
+        String apiKey = "YOUR_API_KEY_HERE"; // TODO
+        
+        JsonObject responseGlobal = AfClient.get(protocol, host, port).createEvent(
+                AfOptions.create(apiUser, apiKey)
                         .add("channel", "p2p_money_transfer")
                         .add("sub_channel", "sub_channel")
                         .add("src_id", AfClient.SHA_256("4000123412341233"))
@@ -62,8 +68,8 @@ public class Example {
                         .add("currency", 643));
         System.out.println(responseGlobal);
 
-        JsonObject responseAcquiring = AfClient.get("http://localhost:7499/api/v2/createEvent")
-                .createEvent(AfOptions.create("user", "secret")
+        JsonObject responseAcquiring = AfClient.get(String.format("%s://%s:%s/api/v2.1/createEvent", protocol, host, port))
+                .createEvent(AfOptions.create(apiUser, apiKey)
                         .add("channel", "acquiring")
                         .add("sub_channel", "sub_channel")
                         .add("src_id", AfClient.SHA_256("400012341234232"))
@@ -80,8 +86,8 @@ public class Example {
                         .add("currency", 643));
         System.out.println(responseAcquiring);
 
-        JsonObject updateCharge = AfClient.get("http", "host", 7499).updateEvent(
-                AfOptions.create("user", "secret")
+        JsonObject updateCharge = AfClient.get(protocol, host, port).updateEvent(
+                AfOptions.create(apiUser, apiKey)
                         .add("tx_id", responseGlobal.get("tx_id").asString())
                         .add("status", "OK")
                         .add("is_authed", 1)
