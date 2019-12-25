@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.Scanner;
 
 /**
@@ -66,7 +67,7 @@ public class AfClient {
         javax.crypto.Mac mac = javax.crypto.Mac.getInstance("HmacSHA1");
         mac.init(ks);
         byte[] result = mac.doFinal(json.getBytes(StandardCharsets.UTF_8));
-        return new sun.misc.BASE64Encoder().encode(result);
+        return Base64.getEncoder().encodeToString(result);
     }
 
     private JsonObject postCreate(String json) throws IOException {

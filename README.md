@@ -23,12 +23,12 @@ Then set the request parameters (see omnireact-integration.pdf for the details):
 
 Possible JSON responses:
 ```json
-{"code":203,"comment":"Bad signature"}
-```
-```json
 "{"channel":"payment","tags":[],"score":0,"queues":[],"id":"eve_payment:72431e42-ec2d-4ea3-9d50-0445710ee759","rules":["Default"],"action":"CHALLENGE","comments":[]}"
 ```
-
+```Bad signature
+HTTP/1.1 401 Unauthorized
+Content-Length: 0
+```
 
 A full example:
 
@@ -62,12 +62,12 @@ public class Example {
                         .add("currency", 643));
         System.out.println(responsePayment);
 
-        JsonObject updateCharge = AfClient.get("https", "hostName", 7499)
+        JsonObject updateResponse = AfClient.get("https", "hostName", 7499)
                 .updateEvent(AfOptions.update(team, sign, "payment",
                         responsePayment.getString("id", null), AfOptions.FRAUD)
                         .add("code", "123")
                         .add("is_authed", 1));
-        System.out.println(updateCharge);
+        System.out.println(updateResponse);
 
     }
 }
