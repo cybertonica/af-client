@@ -1,16 +1,14 @@
 AFClient
 ===================================
 
-To connect the test environment replace "localhost", "user" and "secret" with the actual data (provided on a request).
+To connect the test environment replace "hostName", "team" and "secret" with the actual data (provided on a request).
 
 ```java
-AfClient.get("http", "host", 7499).createEvent(AfOptions.create("user", "secret"))
+AfClient.get("https", "hostName", 7499).createEvent(AfOptions.create("team", "secret", "payment"))
 ```
 
 Then set the request parameters (see omnireact-integration.pdf for the details):
 ```java
-                        .add("channel", "money_transfer")
-                        .add("sub_channel", "test_subchannel2")
                         .add("src_id", AfClient.SHA_256("4000123412341233")))
                         .add("src_parent", "VISA")
                         .add("src_partner", "src_partner")
@@ -28,7 +26,7 @@ Possible JSON responses:
 {"code":203,"comment":"Bad signature"}
 ```
 ```json
-"{\"tx_id\":\"aq_tx:560c178ce4b099255ca27a7c\",\"action\":\"ALLOW\",\"risk_score\":0,\"rule_score\":0,\"reason\":\"ALLOW\\tdefault strategy\\t \",\"hierarchy\":{\"ML\":{}}}"
+"{"channel":"payment","tags":[],"score":0,"queues":[],"id":"eve_payment:72431e42-ec2d-4ea3-9d50-0445710ee759","rules":["Default"],"action":"CHALLENGE","comments":[]}"
 ```
 
 
@@ -47,25 +45,9 @@ public class Example {
 
     public static void main(String[] args)
             throws IOException, NoSuchAlgorithmException, InvalidKeyException {
-        JsonObject responseGlobal = AfClient.get("http", "host", 7499).createEvent(
-                AfOptions.create("user", "secret")
-                        .add("channel", "p2p_money_transfer")
-                        .add("sub_channel", "sub_channel")
-                        .add("src_id", AfClient.SHA_256("4000123412341233"))
-                        .add("src_parent", "VISA")
-                        .add("dst_id", 9168212901L)
-                        .add("dst_parent", "MTS")
-                        .add("amount", 10201)
-                        .add("exp", 2)
-                        .add("exp_date", "1/25")
-                        .add("operation_type", "input")
-                        .add("currency", 643));
-        System.out.println(responseGlobal);
 
-        JsonObject responseAcquiring = AfClient.get("http://localhost:7499/api/v2/createEvent")
-                .createEvent(AfOptions.create("user", "secret")
-                        .add("channel", "acquiring")
-                        .add("sub_channel", "sub_channel")
+        JsonObject responsePayment = AfClient.get("https", "hostName", 7499)
+                .createEvent(AfOptions.create("team", "secret", "payment", AfOptions.OK)
                         .add("src_id", AfClient.SHA_256("400012341234232"))
                         .add("src_parent", "VISA")
                         .add("dst_id", 9168212906L)
@@ -78,15 +60,13 @@ public class Example {
                         .add("mcc", "123")
                         .add("exp_date", "12/18")
                         .add("currency", 643));
-        System.out.println(responseAcquiring);
+        System.out.println(responsePayment);
 
-        JsonObject updateCharge = AfClient.get("http", "host", 7499).updateEvent(
-                AfOptions.create("user", "secret")
-                        .add("tx_id", responseGlobal.get("tx_id").asString())
-                        .add("status", "OK")
-                        .add("is_authed", 1)
+        JsonObject updateCharge = AfClient.get("https", "hostName", 7499)
+                .updateEvent(AfOptions.update(team, sign, "payment",
+                        responseGlobal.getString("id", null), AfOptions.FRAUD)
                         .add("code", "123")
-                        .add("comment", "some_comment"));
+                        .add("is_authed", 1));
         System.out.println(updateCharge);
 
     }
