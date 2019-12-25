@@ -64,7 +64,7 @@ public class Example {
 
         JsonObject updateCharge = AfClient.get("https", "hostName", 7499)
                 .updateEvent(AfOptions.update(team, sign, "payment",
-                        responseGlobal.getString("id", null), AfOptions.FRAUD)
+                        responsePayment.getString("id", null), AfOptions.FRAUD)
                         .add("code", "123")
                         .add("is_authed", 1));
         System.out.println(updateCharge);
