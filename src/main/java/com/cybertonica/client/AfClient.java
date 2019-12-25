@@ -3,6 +3,8 @@ package com.cybertonica.client;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -13,16 +15,15 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Scanner;
 
-/**
- * Created by oem.
- */
+
 @SuppressWarnings("unused")
 public class AfClient {
 
     private HttpURLConnection connection;
     private String url;
 
-    private AfClient() {}
+    private AfClient() {
+    }
 
     private AfClient(String url) {
         this.url = url;
@@ -37,7 +38,7 @@ public class AfClient {
     }
 
     public static AfClient get(String host, int port) {
-        return new AfClient("https" ,host, port);
+        return new AfClient("https", host, port);
     }
 
     public static AfClient get(String protocol, String host, int port) {
@@ -59,7 +60,7 @@ public class AfClient {
     }
 
     public String sign(AfOptions options) throws NoSuchAlgorithmException, InvalidKeyException {
-        return sign(options.toString(), options.signature);
+        return sign(options.toString(), options.apiKey);
     }
 
     private String sign(String json, String secret) throws NoSuchAlgorithmException, InvalidKeyException {
@@ -113,7 +114,7 @@ public class AfClient {
         connection.setRequestMethod(options.type);
         connection.setRequestProperty("Content-Type", "application/json");
         connection.setRequestProperty("charset", StandardCharsets.UTF_8.name());
-        connection.setRequestProperty("X-AF-Team", options.team);
+        connection.setRequestProperty("X-AF-Team", options.apiUser);
         connection.setRequestProperty("X-AF-Signature", sign(options));
         connection.setUseCaches(false);
     }
@@ -128,5 +129,15 @@ public class AfClient {
             hexString.append(Integer.toHexString(0xFF & aDigest));
         }
         return hexString.toString();
+    }
+
+    public static String SHA_256_salted(String src, String salt) throws NoSuchAlgorithmException, UnsupportedEncodingException, InvalidKeyException {
+        String algorithm = "HmacSHA256";  // OPTIONS= HmacSHA512, HmacSHA256, HmacSHA1, HmacMD5
+        Mac sha256_hmac = Mac.getInstance(algorithm);
+        SecretKeySpec secret_key = new SecretKeySpec(salt.getBytes("UTF-8"), algorithm);
+        sha256_hmac.init(secret_key);
+        String hash = Base64.getEncoder().encodeToString(sha256_hmac.doFinal(src.getBytes("UTF-8")));
+        System.out.println(hash);
+        return hash;
     }
 }

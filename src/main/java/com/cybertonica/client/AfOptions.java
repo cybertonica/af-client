@@ -6,9 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * Created by oem.
- */
+
 @SuppressWarnings("unused")
 public class AfOptions {
 
@@ -19,18 +17,18 @@ public class AfOptions {
     public final static String FRAUD = "FRAUD";
     public final static String FAILED = "FAILED";
 
-    final String team;
-    final String signature;
+    final String apiUser;
+    final String apiKey;
     final String channel;
     final String type;
     final Optional<String> updateId;
     private JsonObject params = new JsonObject();
     private final Map<String, String> query = new HashMap<>(2);
 
-    private AfOptions(String team, String signature, String channel, String type,
+    private AfOptions(String apiUser, String apiKey, String channel, String type,
                       Optional<String> subChannel, Optional<String> status, Optional<String> updateId) {
-        this.team = team;
-        this.signature = signature;
+        this.apiUser = apiUser;
+        this.apiKey = apiKey;
         this.channel = channel;
         this.type = type;
         this.updateId = updateId;
@@ -38,20 +36,20 @@ public class AfOptions {
         status.ifPresent(s -> query.put("status", s));
     }
 
-    public static AfOptions create(String user, String signature, String channel) {
-        return new AfOptions(user, signature, channel, CREATE, Optional.empty(), Optional.empty(), Optional.empty());
+    public static AfOptions create(String apiUser, String apiKey, String channel) {
+        return new AfOptions(apiUser, apiKey, channel, CREATE, Optional.empty(), Optional.empty(), Optional.empty());
     }
 
-    public static AfOptions create(String user, String signature, String channel, String subChannel, String status) {
-        return new AfOptions(user, signature, channel, CREATE, Optional.of(subChannel), Optional.of(status), Optional.empty());
+    public static AfOptions create(String apiUser, String apiKey, String channel, String subChannel, String status) {
+        return new AfOptions(apiUser, apiKey, channel, CREATE, Optional.of(subChannel), Optional.of(status), Optional.empty());
     }
 
-    public static AfOptions create(String user, String signature, String channel, String status) {
-        return new AfOptions(user, signature, channel, CREATE, Optional.empty(), Optional.of(status), Optional.empty());
+    public static AfOptions create(String apiUser, String apiKey, String channel, String status) {
+        return new AfOptions(apiUser, apiKey, channel, CREATE, Optional.empty(), Optional.of(status), Optional.empty());
     }
 
-    public static AfOptions update(String user, String signature, String channel, String updateId, String status) {
-        return new AfOptions(user, signature, channel, UPDATE, Optional.empty(), Optional.of(status), Optional.of(updateId));
+    public static AfOptions update(String apiUser, String apiKey, String channel, String updateId, String status) {
+        return new AfOptions(apiUser, apiKey, channel, UPDATE, Optional.empty(), Optional.of(status), Optional.of(updateId));
     }
 
     public AfOptions set(JsonObject params) {
